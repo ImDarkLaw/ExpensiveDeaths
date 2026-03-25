@@ -1,7 +1,7 @@
 package net.silverstonemc.expensivedeaths;
 
 import com.google.common.base.Suppliers;
-import me.clip.placeholderapi.PlaceholderAPI;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -15,6 +15,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import me.clip.placeholderapi.PlaceholderAPI;
+
 public abstract class Execution {
     private static final Supplier<Boolean> USE_PLACEHOLDERAPI = Suppliers.memoize(() -> Bukkit
         .getPluginManager().isPluginEnabled("PlaceholderAPI"));
@@ -24,7 +26,8 @@ public abstract class Execution {
     private static final Pattern KEY_EXECUTION = Pattern.compile(
         "(?i)run|(run-?)?(cmds?|commands?)|execut(e|ions?)");
 
-    public static @Nullable Execution of(Object object) {
+    @Nullable
+    public static Execution of(Object object) {
         if (object instanceof String) return new SimpleExecution((String) object);
         else if (object instanceof Iterable) {
             List<Execution> executions = new ArrayList<>();
@@ -53,7 +56,8 @@ public abstract class Execution {
                     if (execution != null) executions.add(execution);
                 }
             }
-            if (!executions.isEmpty()) return new AdvancedExecution(chance,
+            if (!executions.isEmpty()) return new AdvancedExecution(
+                chance,
                 cancelling,
                 permission,
                 executions);
@@ -126,7 +130,12 @@ public abstract class Execution {
     }
 
     public enum Type {
-        DEATH_PLAYER, DEATH_CONSOLE, KILL_PLAYER, KILL_CONSOLE, RESPAWN_PLAYER, RESPAWN_CONSOLE;
+        DEATH_PLAYER,
+        DEATH_CONSOLE,
+        KILL_PLAYER,
+        KILL_CONSOLE,
+        RESPAWN_PLAYER,
+        RESPAWN_CONSOLE;
 
         public boolean isConsole() {
             return this == DEATH_CONSOLE || this == KILL_CONSOLE || this == RESPAWN_CONSOLE;

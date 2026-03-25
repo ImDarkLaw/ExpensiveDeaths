@@ -3,6 +3,7 @@ package net.silverstonemc.expensivedeaths;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.permission.Permission;
+
 import org.apache.commons.lang.LocaleUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -32,7 +33,8 @@ public class DeathEvent implements Listener {
         // Check if the player has the bypass permission
         if (player.hasPermission("expensivedeaths.bypass")) {
             if (!plugin.getConfig().getString("bypass-message").isBlank())
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                player.sendMessage(ChatColor.translateAlternateColorCodes(
+                    '&',
                     plugin.getConfig().getString("bypass-message")));
             return;
         }
@@ -49,15 +51,19 @@ public class DeathEvent implements Listener {
 
         // Empty balance
         if (option.equalsIgnoreCase("ALL")) result = econ.withdrawPlayer(player, econ.getBalance(player));
+
             // Random percent range
         else if (option.contains("%")) if (option.contains("-")) {
             double min = Double.parseDouble(option.replaceAll("-.*", ""));
             double max = Double.parseDouble(option.replaceAll(".*-", "").replace("%", ""));
             double r = ThreadLocalRandom.current().nextDouble(min, max + 1);
             result = econ.withdrawPlayer(player, (r / 100) * econ.getBalance(player));
+
             // Percent
-        } else result = econ.withdrawPlayer(player,
+        } else result = econ.withdrawPlayer(
+            player,
             (Double.parseDouble(option.replace("%", "")) / 100) * econ.getBalance(player));
+
             // Fixed amount
         else result = econ.withdrawPlayer(player, Double.parseDouble(option));
 
@@ -73,10 +79,14 @@ public class DeathEvent implements Listener {
         // Run the executions
         Player killer = player.getKiller();
         Function<String, String> parser = str -> {
-            String s = str.replace("{PLAYER}", player.getName()).replace("{DISPLAYNAME}",
+            String s = str.replace("{PLAYER}", player.getName()).replace(
+                "{DISPLAYNAME}",
                 player.getDisplayName()).replace("{MONEY}", money).replace("{BALANCE}", balance);
-            if (killer != null) s = s.replace("{KILLER}", killer.getName()).replace("{KILLER_DISPLAYNAME}",
+
+            if (killer != null) s = s.replace("{KILLER}", killer.getName()).replace(
+                "{KILLER_DISPLAYNAME}",
                 killer.getDisplayName());
+
             return s;
         };
 
