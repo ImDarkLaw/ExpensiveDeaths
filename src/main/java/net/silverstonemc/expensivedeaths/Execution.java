@@ -18,8 +18,11 @@ import java.util.regex.Pattern;
 import me.clip.placeholderapi.PlaceholderAPI;
 
 public abstract class Execution {
+    // Cache PlaceholderAPI availability to avoid checking plugin manager on every command run
     private static final Supplier<Boolean> USE_PLACEHOLDERAPI = Suppliers.memoize(() -> Bukkit
         .getPluginManager().isPluginEnabled("PlaceholderAPI"));
+
+    // Flexible key matching allows config aliases like probability/prob, stop/break, etc
     private static final Pattern KEY_CHANCE = Pattern.compile("(?i)(test-?)?(chance|prob(ability)?)");
     private static final Pattern KEY_CANCEL = Pattern.compile("(?i)break|stop|cancel(ling)?");
     private static final Pattern KEY_PERMISSION = Pattern.compile("(?i)(meet-?)?perm(ission)?");
@@ -28,34 +31,47 @@ public abstract class Execution {
 
     @Nullable
     public static Execution of(Object object) {
+        // A plain string is treated as a single command execution
         if (object instanceof String) return new SimpleExecution((String) object);
+
         else if (object instanceof Iterable) {
+            // Lists can contain nested structures, so parse each entry recursively
             List<Execution> executions = new ArrayList<>();
             for (Object o : (Iterable<?>) object) {
                 Execution execution = of(o);
                 if (execution != null) executions.add(execution);
             }
+
+            // Default advanced execution for list input (no chance/permission/cancel metadata)
             if (!executions.isEmpty()) return new AdvancedExecution(0.0, false, null, executions);
+
         } else if (object instanceof Map) {
             double chance = 0.0;
             boolean cancelling = false;
             String permission = null;
             List<Execution> executions = new ArrayList<>();
+
+            // Parse advanced execution options from object keys
             for (Map.Entry<?, ?> entry : ((Map<?, ?>) object).entrySet()) {
                 String key = String.valueOf(entry.getKey());
                 Object value = entry.getValue();
+
                 if (KEY_CHANCE.matcher(key).matches()) try {
                     chance = Double.parseDouble(String.valueOf(value));
                 } catch (NumberFormatException ignored) {
                 }
+
                 else if (KEY_CANCEL.matcher(key).matches())
                     cancelling = String.valueOf(value).equalsIgnoreCase("true");
+
                 else if (KEY_PERMISSION.matcher(key).matches()) permission = String.valueOf(value);
+
                 else if (KEY_EXECUTION.matcher(key).matches()) {
                     Execution execution = of(value);
                     if (execution != null) executions.add(execution);
                 }
             }
+
             if (!executions.isEmpty()) return new AdvancedExecution(
                 chance,
                 cancelling,
@@ -73,11 +89,14 @@ public abstract class Execution {
 
     public void run(CommandSender sender, Player player, Player agent, String cmd, Function<String, String> parser) {
         String s = parser.apply(cmd);
+
+        // Optional PlaceholderAPI support for users who enable it in config
         if (USE_PLACEHOLDERAPI.get() && ExpensiveDeaths.getInstance().getConfig().getBoolean(
             "bonus.parse-placeholders")) {
             s = PlaceholderAPI.setPlaceholders(player, s);
             if (agent != null) s = PlaceholderAPI.setBracketPlaceholders(agent, s);
         }
+
         Bukkit.dispatchCommand(sender, s);
     }
 
@@ -122,6 +141,7 @@ public abstract class Execution {
         public boolean run(CommandSender sender, Player player, Player agent, Function<String, String> parser) {
             if (!testChance() || !meetPermission(player)) return false;
 
+            // Stop traversing this level if a child execution requests cancellation
             for (Execution execution : executions)
                 if (execution.run(sender, player, agent, parser)) break;
 
