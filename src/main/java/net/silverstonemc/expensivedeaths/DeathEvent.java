@@ -81,7 +81,9 @@ public class DeathEvent implements Listener {
         Function<String, String> parser = str -> {
             String s = str.replace("{PLAYER}", player.getName()).replace(
                 "{DISPLAYNAME}",
-                player.getDisplayName()).replace("{MONEY}", money).replace("{BALANCE}", balance);
+                player.getDisplayName()).replace("{MONEY}", money).replace(
+                "{BALANCE}",
+                balance);
 
             if (killer != null) s = s.replace("{KILLER}", killer.getName()).replace(
                 "{KILLER_DISPLAYNAME}",
