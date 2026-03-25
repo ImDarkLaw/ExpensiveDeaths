@@ -2,6 +2,8 @@ package net.silverstonemc.expensivedeaths;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
+
+import org.bstats.bukkit.Metrics;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -18,10 +20,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class ExpensiveDeaths extends JavaPlugin implements Listener, CommandExecutor {
-    public static ExpensiveDeaths getInstance() {
-        return instance;
-    }
-
     private Economy econ;
     private Permission perms;
     private final Map<Execution.Type, Execution> executions = new HashMap<>();
@@ -30,6 +28,9 @@ public class ExpensiveDeaths extends JavaPlugin implements Listener, CommandExec
     @Override
     public void onEnable() {
         instance = this;
+
+        //noinspection ResultOfObjectAllocationIgnored
+        new Metrics(this, 30399);
 
         setupEconomy();
         setupPermissions();
@@ -60,6 +61,10 @@ public class ExpensiveDeaths extends JavaPlugin implements Listener, CommandExec
 
         sender.sendMessage(ChatColor.GREEN + "ExpensiveDeaths reloaded!");
         return true;
+    }
+
+    public static ExpensiveDeaths getInstance() {
+        return instance;
     }
 
     public Economy getEconomy() {

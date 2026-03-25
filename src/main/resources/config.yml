@@ -145,3 +145,9 @@ bonus:
         - "command 1"
         - chance: 0.40
           run: "command 2"
+
+
+
+# This plugin uses bStats metrics
+# https://bstats.org/plugin/bukkit/ExpensiveDeaths/30399
+# Metrics can be disabled in the bStats config.yml

@@ -6,7 +6,7 @@
 
     <groupId>net.silverstonemc</groupId>
     <artifactId>ExpensiveDeaths</artifactId>
-    <version>1.5.3</version>
+    <version>1.6.0-beta</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -70,6 +70,11 @@
                                 <relocation>
                                     <pattern>org.json</pattern>
                                     <shadedPattern>net.silverstonemc.expensivedeaths.shaded.json
+                                    </shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.bstats</pattern>
+                                    <shadedPattern>net.silverstonemc.expensivedeaths.shaded.bstats
                                     </shadedPattern>
                                 </relocation>
                             </relocations>
@@ -149,6 +154,12 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20240303</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.2.1</version>
         </dependency>
     </dependencies>
 
