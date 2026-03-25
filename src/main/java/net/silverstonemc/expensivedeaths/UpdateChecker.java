@@ -7,6 +7,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.InputStream;
@@ -19,6 +20,11 @@ public class UpdateChecker implements Listener {
     }
 
     private final JavaPlugin plugin;
+    private static final String PLUGIN_ID = "2bq9PFVl";
+
+    private String getUrl() {
+        return "https://modrinth.com/plugin/" + PLUGIN_ID + "/changelog";
+    }
 
     @EventHandler(ignoreCancelled = true)
     public void onJoin(PlayerJoinEvent event) {
@@ -29,29 +35,30 @@ public class UpdateChecker implements Listener {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    String latest = getLatestVersion();
                     String current = plugin.getDescription().getVersion();
+                    String latest = getLatestVersion();
 
                     if (latest == null) return;
                     if (!current.equals(latest)) event.getPlayer()
-                        .sendMessage(ChatColor.YELLOW + "An update is available for " + pluginName + "! " + ChatColor.GOLD + "(" + current + " → " + latest + ")\n" + ChatColor.DARK_AQUA + "https://github.com/SilverstoneMC/" + pluginName + "/releases/latest");
+                        .sendMessage(ChatColor.YELLOW + "An update is available for " + pluginName + "! " + ChatColor.GOLD + "(" + current + " → " + latest + ")\n" + ChatColor.DARK_AQUA + getUrl());
                 }
             }.runTaskAsynchronously(plugin);
     }
 
-    public @Nullable String getLatestVersion() {
-        String pluginName = plugin.getDescription().getName();
-
+    @Nullable
+    public String getLatestVersion() {
         try {
             // Send the request
-            InputStream url = new URI("https://api.github.com/repos/SilverstoneMC/" + pluginName + "/releases/latest")
-                .toURL().openStream();
+            InputStream url = new URI("https://api.modrinth.com/v2/project/" + PLUGIN_ID + "/version").toURL()
+                .openStream();
 
             // Read the response
-            JSONObject response = new JSONObject(new String(url.readAllBytes(), StandardCharsets.UTF_8));
+            JSONObject response = new JSONArray(new String(
+                url.readAllBytes(),
+                StandardCharsets.UTF_8)).getJSONObject(0);
             url.close();
 
-            return response.getString("tag_name");
+            return response.getString("version_number");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -65,6 +72,6 @@ public class UpdateChecker implements Listener {
 
         plugin.getLogger()
             .warning("An update is available for " + pluginName + "! (" + current + " → " + latest + ")");
-        plugin.getLogger().warning("https://github.com/SilverstoneMC/" + pluginName + "/releases/latest");
+        plugin.getLogger().warning(getUrl());
     }
 }
