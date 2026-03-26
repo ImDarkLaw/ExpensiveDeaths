@@ -23,10 +23,7 @@ public class UpdateChecker implements Listener {
 
     private final JavaPlugin plugin;
     private static final String PLUGIN_ID = "2bq9PFVl";
-
-    private String getUrl() {
-        return "https://modrinth.com/plugin/" + PLUGIN_ID + "/changelog";
-    }
+    private static final String PLUGIN_URL = "https://modrinth.com/plugin/" + PLUGIN_ID + "/changelog";
 
     @EventHandler(ignoreCancelled = true)
     public void onJoin(PlayerJoinEvent event) {
@@ -42,9 +39,17 @@ public class UpdateChecker implements Listener {
 
                     if (latest == null) return;
                     if (!current.equals(latest)) event.getPlayer()
-                        .sendMessage(ChatColor.YELLOW + "An update is available for " + pluginName + "! " + ChatColor.GOLD + "(" + current + " → " + latest + ")\n" + ChatColor.DARK_AQUA + getUrl());
+                        .sendMessage(ChatColor.YELLOW + "An update is available for " + pluginName + "! " + ChatColor.GOLD + "(" + current + " → " + latest + ")\n" + ChatColor.DARK_AQUA + PLUGIN_URL);
                 }
             }.runTaskAsynchronously(plugin);
+    }
+
+    public void logUpdate(String current, String latest) {
+        String pluginName = plugin.getDescription().getName();
+
+        plugin.getLogger()
+            .warning("An update is available for " + pluginName + "! (" + current + " → " + latest + ")");
+        plugin.getLogger().warning(PLUGIN_URL);
     }
 
     @Nullable
@@ -67,13 +72,5 @@ public class UpdateChecker implements Listener {
         }
 
         return null;
-    }
-
-    public void logUpdate(String current, String latest) {
-        String pluginName = plugin.getDescription().getName();
-
-        plugin.getLogger()
-            .warning("An update is available for " + pluginName + "! (" + current + " → " + latest + ")");
-        plugin.getLogger().warning(getUrl());
     }
 }
